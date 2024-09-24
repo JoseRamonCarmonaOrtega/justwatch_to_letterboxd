@@ -1,5 +1,7 @@
 # JustWatch's watchlist to letterboxd
-IMPORTANT: You need to be on https://www.justwatch.com/us/lists/my-lists and display the movies in square format.
+IMPORTANT: You need to be on https://www.justwatch.com/us/lists/my-lists and display the movies in list format as you can see on this photo
+
+![image](https://github.com/user-attachments/assets/5cbc86e6-56d2-4bb8-b4d8-c8b863e5234b)
 
 Then, open the console and execute the code.
 
