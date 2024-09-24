@@ -1,4 +1,4 @@
-# justwatch_to_letterboxd
+# JustWatch's watchlist to letterboxd
 IMPORTANT: You need to be on https://www.justwatch.com/us/lists/my-lists and display the movies in square format.
 
 Then, open the console and execute the code.
