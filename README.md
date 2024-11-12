@@ -65,3 +65,4 @@ scrollAndExtract();
 
 
 ```
+It will drop a csv, upload it on https://letterboxd.com/import/ et voila!
