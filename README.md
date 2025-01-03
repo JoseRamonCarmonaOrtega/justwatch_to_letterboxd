@@ -48,9 +48,10 @@ async function scrollAndExtract() {
     });
 
     // Create the CSV content in the required format: "Title","Year"
-    let csvContent = "data:text/csv;charset=utf-8,Title,Year\n" + 
+    let csvContent = "Title,Year\n" + 
         titles.map(e => `"${e.Title}","${e.Year}"`).join("\n"); // Ensure titles and years are in quotes
-    let encodedUri = encodeURI(csvContent); // Encode the CSV content for the link
+    let encodedCsvContent = encodeURIComponent(csvContent); // Encode the CSV content for the link
+    let encodedUri = "data:text/csv;charset=utf-8," + encodedCsvContent; // Create the URI with the encoding
     let link = document.createElement("a"); // Create a link element
     link.setAttribute("href", encodedUri); // Set the href to the encoded CSV content
     link.setAttribute("download", "justwatch_watchlist.csv"); // Set the download filename
