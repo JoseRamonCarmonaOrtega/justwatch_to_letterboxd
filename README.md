@@ -67,3 +67,5 @@ scrollAndExtract();
 
 ```
 It will drop a csv, upload it on https://letterboxd.com/import/ et voila!
+
+Note: it also works for the rest of sections with the same display as my lists, I mean, 1/2 Lists, Watchlist, Seen, Liked, etc.
