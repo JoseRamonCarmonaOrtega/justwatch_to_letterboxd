@@ -3,7 +3,7 @@ IMPORTANT: You need to be on https://www.justwatch.com/us/lists/my-lists and dis
 
 ![image](https://github.com/user-attachments/assets/5cbc86e6-56d2-4bb8-b4d8-c8b863e5234b)
 
-Then, open the console and execute the code.
+Then, open the console ("Cmd + Option + J" (on a Mac) or "Ctrl +Shift +J" (on Windows)) and execute the code.
 
 It would be convenient to put in the language section, American English because, from my experience, some title's translation won't be on letterboxd.
 
