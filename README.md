@@ -12,59 +12,68 @@ Here is the script:
 
 ```
 async function scrollAndExtract() {
-    let previousHeight = document.body.scrollHeight; // Store the previous height of the page
-    let titles = []; // Initialize an array to store movie titles and years
+    let previousHeight = 0;
+    let retries = 0;
+    const MAX_RETRIES = 3; // Prevents the script from stopping prematurely due to network lag
 
-    // Function to scroll to the bottom of the page
-    const scrollToBottom = () => {
+    console.log("Starting to scroll...");
+
+    // 1. Scroll to the bottom with a built-in retry mechanism
+    while (retries < MAX_RETRIES) {
         window.scrollTo(0, document.body.scrollHeight);
-    };
+        await new Promise(resolve => setTimeout(resolve, 1500)); 
 
-    // Repeat until there is no more content to load
-    while (true) {
-        scrollToBottom(); // Scroll down
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds to allow content to load
-
-        // Get the new height of the page after scrolling
-        let newHeight = document.body.scrollHeight;
-
-        // If the height hasn't changed, we've reached the end of the content
+        const newHeight = document.body.scrollHeight;
         if (newHeight === previousHeight) {
-            break; // Exit the loop if no more content is found
+            retries++; // If no new content loaded, increment the retry counter
+        } else {
+            retries = 0; // If content successfully loaded, reset the counter
+            previousHeight = newHeight;
         }
-
-        previousHeight = newHeight; // Update the previous height for the next iteration
     }
 
-    // After scrolling, extract the movie titles and years
-    let items = Array.from(document.querySelectorAll('h2.title-card-heading'));
+    console.log("Extracting titles...");
 
-    titles = items.map(item => {
-        let titleWithYear = item.innerText.trim(); // Get the full title text, which includes the year
-        let yearMatch = titleWithYear.match(/\((\d{4})\)$/); // Extract the year using regex, matching (YYYY) at the end
-        let year = yearMatch ? yearMatch[1] : ""; // Extract the year or set to an empty string if not found
-        let title = titleWithYear.replace(/\s*\(\d{4}\)$/, ""); // Remove the year from the title
-        return { Title: title, Year: year }; // Return an object containing the cleaned title and year
+    // 2. DOM Extraction and data mapping in a single pass
+    const items = document.querySelectorAll('h2.title-card-heading');
+    const titles = Array.from(items, item => {
+        const text = item.innerText.trim();
+        const yearMatch = text.match(/\((\d{4})\)$/);
+        const year = yearMatch ? yearMatch[1] : "";
+        
+        // Remove the year from the title string and escape double quotes for valid CSV formatting
+        const title = text.replace(/\s*\(\d{4}\)$/, "").replace(/"/g, '""');
+        
+        return `"${title}","${year}"`;
     });
 
-    // Create the CSV content in the required format: "Title","Year"
-    let csvContent = "Title,Year\n" + 
-        titles.map(e => `"${e.Title}","${e.Year}"`).join("\n"); // Ensure titles and years are in quotes
-    let encodedCsvContent = encodeURIComponent(csvContent); // Encode the CSV content for the link
-    let encodedUri = "data:text/csv;charset=utf-8," + encodedCsvContent; // Create the URI with the encoding
-    let link = document.createElement("a"); // Create a link element
-    link.setAttribute("href", encodedUri); // Set the href to the encoded CSV content
-    link.setAttribute("download", "justwatch_watchlist.csv"); // Set the download filename
-    document.body.appendChild(link); // Append the link to the body
-    link.click(); // Trigger a click to download the CSV
+    if (titles.length === 0) {
+        console.warn("No movies found. Please make sure you are using the list view format.");
+        return;
+    }
+
+    // 3. CSV Generation using Blob (Bypasses URL length limits for massive watchlists)
+    const csvContent = "Title,Year\n" + titles.join("\n");
     
-    console.log("CSV generated successfully."); // Log a success message
+    // Inject BOM (Byte Order Mark) to ensure Excel and other parsers read special characters correctly
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    // 4. Trigger download and perform cleanup
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "justwatch_watchlist.csv";
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link); // Keep the DOM clean
+    URL.revokeObjectURL(url); // Free up browser memory
+
+    console.log(`Success! CSV generated with ${titles.length} movies.`);
 }
 
-// Execute the function
+// Execute the extraction
 scrollAndExtract();
-
-
 ```
 It will drop a csv, upload it on https://letterboxd.com/import/ et voila!
 
